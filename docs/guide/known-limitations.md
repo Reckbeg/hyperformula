@@ -41,7 +41,7 @@ you can't compare the arguments in a formula like this:
 
 ### OFFSET function
 
-Unlike Excel and Google Sheets, HyperFormula resolves the OFFSET function at parse time rather than during evaluation. The parser inspects the arguments and rewrites the expression into a plain cell reference or range. This keeps the dependency graph accurate but imposes several restrictions.
+HyperFormula resolves the OFFSET function at parse time rather than during evaluation. The parser inspects the arguments and rewrites the expression into a plain cell reference or range. This keeps the dependency graph accurate but imposes several restrictions.
 
 * The first argument must be a reference to a single cell. Passing a range raises a parsing error.
 
@@ -68,7 +68,7 @@ Unlike Excel and Google Sheets, HyperFormula resolves the OFFSET function at par
   hf.setCellContents({ sheet: 0, row: 0, col: 0 }, '=OFFSET(A1, -1, 0)');
   ```
 
-* Because OFFSET is resolved at parse time, `getCellFormula` returns the computed reference, not the original `OFFSET` call.
+* OFFSET is resolved at parse time, so `getCellFormula` returns the computed reference, not the original `OFFSET` call.
 
   ```js
   const hf = HyperFormula.buildFromArray([[1, 45, '=OFFSET(A1, 0, 1)']]);
