@@ -43,28 +43,28 @@ you can't compare the arguments in a formula like this:
 
 HyperFormula resolves the OFFSET function at parse time rather than during evaluation. The parser inspects the arguments and rewrites the expression into a plain cell reference or range. This keeps the dependency graph accurate but imposes several restrictions.
 
-* The first argument must be a reference to a single cell. Passing a range raises a parsing error.
+* The first argument must be a reference to a single cell. Passing a range causes the cell to store a parser error (the API call itself does not throw — read the error via `getCellValue`).
 
   ```js
-  // Raises a parsing error — the first argument must be a single cell, not a range
+  // Cell A1 stores a parser error — the first argument must be a single cell, not a range
   hf.setCellContents({ sheet: 0, row: 0, col: 0 }, '=OFFSET(A1:B1, 0, 0)');
   ```
 
-* The row-shift, column-shift, height, and width arguments must be static integer literals known at parse time. Cell references and formulas passed as shift or size arguments produce a parsing error.
+* The row-shift, column-shift, height, and width arguments must be static integer literals known at parse time. Cell references and formulas passed as shift or size arguments cause the cell to store a parser error.
 
   ```js
-  // Raises a parsing error — the row-shift argument must be a static integer literal
+  // Cell A1 stores a parser error — the row-shift argument must be a static integer literal
   hf.setCellContents({ sheet: 0, row: 0, col: 0 }, '=OFFSET(A1, C3, 0)');
   ```
 
   Lifting this restriction requires treating OFFSET as a regular interpreted function. The work is tracked in [issue #910](https://github.com/handsontable/hyperformula/issues/910).
 
-* The height and width arguments must be positive integers. Values less than 1 and non-integer values are rejected at parse time.
+* The height and width arguments must be bare positive integer literals (the parser accepts only `NUMBER` AST nodes). Unary `+` prefixes, parenthesised expressions, values less than 1, and non-integer values are rejected at parse time.
 
-* When the computed target falls outside the sheet, OFFSET evaluates to a `#REF!` error indicating the resulting reference is out of the sheet bounds.
+* When the computed target falls outside the sheet, the parser stores a `#REF!` error in the cell at parse time (rather than during evaluation) with the message *Resulting reference is out of the sheet*.
 
   ```js
-  // Cell A1 evaluates to #REF!
+  // Cell A1 stores #REF!
   hf.setCellContents({ sheet: 0, row: 0, col: 0 }, '=OFFSET(A1, -1, 0)');
   ```
 
